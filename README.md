@@ -3,9 +3,9 @@
 This repo is the codebase for the paper:
 
 [**GeoStyle: GeoStyle: Discovering Fashion Trends and Events**](https://geostyle.cs.cornell.edu)
-
+<br>
 [Utkarsh Mall](http://www.cs.cornell.edu/~utkarshm/), [Kevin Matzen](http://www.kmatzen.com/), [Bharath Hariharan](http://home.bharathh.info/), [Noah Snavely](http://www.cs.cornell.edu/~snavely/), [Kavita Bala](http://www.cs.cornell.edu/~kb/)
-
+<br>
 ICCV 2019
 
 ### Abstract
@@ -18,5 +18,5 @@ Understanding fashion styles and trends is of great potential interest to retail
 The code consists of two directories, ```googlenet``` and ```trends_events```.
 
 ```googlenet```: Contains code for training GoogLeNet on StreetStyle-27k and pre-trained models.
-
+<br>
 ```trends_events```: Contains code for trend-fitting and event detection.
