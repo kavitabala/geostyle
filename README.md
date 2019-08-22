@@ -5,6 +5,7 @@ This repo is the codebase for the paper:
 [**GeoStyle: GeoStyle: Discovering Fashion Trends and Events**](https://geostyle.cs.cornell.edu)
 
 [Utkarsh Mall](http://www.cs.cornell.edu/~utkarshm/), [Kevin Matzen](http://www.kmatzen.com/), [Bharath Hariharan](http://home.bharathh.info/), [Noah Snavely](http://www.cs.cornell.edu/~snavely/), [Kavita Bala](http://www.cs.cornell.edu/~kb/)
+
 ICCV 2019
 
 ### Abstract
