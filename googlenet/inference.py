@@ -1,8 +1,9 @@
 from os.path import join
 import numpy as np
-from scipy.misc import imread, imresize
+from imageio import imread
 from googlenet_infer import GoogleNet
 from utils.manifest_api import Annotations
+from PIL import Image
 
 input_dir = 'example_images'
 images = ['517e7840514601336ff8dc2f8e33db3d_916651760287028794_296662372.jpg', \
@@ -27,8 +28,11 @@ glnet = GoogleNet(attributes, categories, 224)
 images = [imread(join(input_dir, fname)) for fname in images]
 # crop
 images = [images[i][crops[i][1]:crops[i][3], crops[i][0]:crops[i][2]] for i in range(len(images))]
-images = [imresize(image, (224, 224)) for image in images]
+size = (200,200)
+images = [Image.fromarray(image).resize(size) for image in images]
+#images = [imresize(image, (224, 224)) for image in images]
 images = np.array(images)
+print(images)
 
 classes = glnet.get_classes(images)
 for image in classes:
