@@ -28,10 +28,10 @@ glnet = GoogleNet(attributes, categories, 224)
 images = [imread(join(input_dir, fname)) for fname in images]
 # crop
 images = [images[i][crops[i][1]:crops[i][3], crops[i][0]:crops[i][2]] for i in range(len(images))]
-size = (200,200)
+size = (224,224)
 images = [Image.fromarray(image).resize(size) for image in images]
 #images = [imresize(image, (224, 224)) for image in images]
-images = np.array(images)
+images = np.array([np.asarray(i) for i in images])
 print(images)
 
 classes = glnet.get_classes(images)
