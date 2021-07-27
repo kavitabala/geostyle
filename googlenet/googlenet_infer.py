@@ -130,19 +130,24 @@ class GoogleNet:
 		self.inception_5a = self._inception_module("inception_5a", self.pool4, True, [256, 160, 320, 32, 128, 128], None)
 		self.inception_5b = self._inception_module("inception_5b", self.inception_5a, True, [384, 192, 384, 48, 128, 128], None)
 		self.pool5 = tf.compat.v1.nn.pool(self.inception_5b, [ 7, 7], "AVG", padding="VALID")
-		self.features = tf.compat.v1.reshape(tf.compat.v1.nn.dropout(self.pool5, keep_prob=self.keep_prob), [-1, 1024])
+		self.features = tf.compat.v1.reshape(tf.compat.v1.nn.dropout(self.pool5, rate=1-self.keep_prob), [-1, 1024])
 
 		for i in range(len(self.attributes)):
 			name = "dense"
 			if i > 0:
 				name += ("_"+str(i))
-			self.fc_out[self.attributes[i]] = tf.compat.v1.layers.dense(inputs=self.features, units=len(self.categories[i]),\
-				kernel_initializer=tf.compat.v1.constant_initializer(np.array(self.ss_net_data[name]["weights"])),\
-				bias_initializer=tf.compat.v1.constant_initializer(self.ss_net_data[name]["biases"]))
+			initializer = tf.keras.initializers.Constant(np.array(self.ss_net_data[name]["weights"]))
+			bias = tf.keras.initializers.Constant(self.ss_net_data[name]["biases"])
+			dense = tf.keras.layers.Dense(
+				units=len(self.categories[i]),
+				kernel_initializer=initializer,
+				bias_initializer=bias,
+				)
+			self.fc_out[self.attributes[i]] = dense(self.features)
 			self.prob[self.attributes[i]] = tf.compat.v1.nn.softmax(self.fc_out[self.attributes[i]])
 
 	def define_initialize_variables(self):
-		self.init = tf.compat.v1.initialize_all_variables()
+		self.init = tf.compat.v1.global_variables_initializer()
 	def define_session(self):
 		config = tf.compat.v1.ConfigProto()
 		self.session = tf.compat.v1.Session(config=config)
