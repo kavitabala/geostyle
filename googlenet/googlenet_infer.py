@@ -56,11 +56,21 @@ class GoogleNet:
 
 
 	def _conv2d(self, inputs, filters, kernel_size, strides, name, trainable, reuse):
+		initializer = tf.keras.initializers.Constant(self.ss_net_data[name]["weights"])
+		bias = tf.keras.initializers.Constant(self.ss_net_data[name]["biases"])
 		padding = 'SAME'
-		layer = tf.compat.v1.layers.conv2d(inputs=inputs, filters=filters, kernel_size=[kernel_size, kernel_size],\
-			kernel_initializer=tf.compat.v1.constant_initializer(self.ss_net_data[name]["weights"]),\
-			bias_initializer=tf.compat.v1.constant_initializer(self.ss_net_data[name]["biases"]),\
-			padding=padding, strides=strides, name=name, use_bias=True, trainable=trainable, reuse=reuse)
+		layer = tf.keras.layers.Conv2D(
+			filters=filters, 
+			kernel_size=[kernel_size, kernel_size],\
+			kernel_initializer=initializer,\
+			bias_initializer=bias,\
+			padding=padding, 
+			strides=strides, 
+			name=name, 
+			use_bias=True,
+			input_shape=inputs.shape)(inputs)
+			# trainable=trainable, 
+			# reuse=reuse)
 		return layer
 
 
@@ -74,7 +84,11 @@ class GoogleNet:
 		inception_3x3 = self._conv2d_relu(inception_3x3_reduce, filters[2], 3, 1, name+'_3x3', trainable, reuse)
 		inception_5x5_reduce = self._conv2d_relu(input, filters[3], 1, 1, name+'_5x5_reduce', trainable, reuse)
 		inception_5x5 = self._conv2d_relu(inception_5x5_reduce, filters[4], 5, 1, name+'_5x5', trainable, reuse)
-		inception_pool = tf.compat.v1.layers.max_pooling2d(inputs=input, pool_size=3, strides=1, padding='SAME')
+		max_pool_2d = tf.keras.layers.MaxPooling2D(
+			pool_size=3,
+			strides=1,
+			padding='SAME')
+		inception_pool = max_pool_2d(input)
 		inception_pool_proj = self._conv2d_relu(inception_pool, filters[5], 1, 1, name+'_pool_proj', trainable, reuse)
 
 		output = tf.concat([inception_1x1, inception_3x3, inception_5x5, inception_pool_proj], axis=-1, name="output_"+name)
@@ -90,24 +104,28 @@ class GoogleNet:
 		self.input = tf.reverse(self.input, axis=[3])
 
 		self.conv1 = self._conv2d_relu(self.input, 64, 7, 2, "conv1_7x7_s2", True, None)
-		self.pool1 = tf.compat.v1.layers.max_pooling2d(inputs=self.conv1, pool_size=3, strides=2, padding='SAME')
+		max_pool_2d = tf.keras.layers.MaxPooling2D(
+			pool_size=3,
+			strides=2,
+			padding='SAME')
+		self.pool1 = max_pool_2d(self.conv1)
 		self.lrn1 = tf.compat.v1.nn.lrn(self.pool1, depth_radius=2, bias=1, alpha=0.00002, beta=0.75)
 
 		self.conv2_reduce = self._conv2d_relu(self.lrn1, 64, 1, 1, "conv2_3x3_reduce", True, None)
 		self.conv2 = self._conv2d_relu(self.conv2_reduce, 192, 3, 1, "conv2_3x3", True, None)
 		self.lrn2 = tf.compat.v1.nn.lrn(self.conv2, depth_radius=2, bias=1, alpha=0.00002, beta=0.75)
-		self.pool2 = tf.compat.v1.layers.max_pooling2d(inputs=self.lrn2, pool_size=3, strides=2, padding='SAME')
+		self.pool2 = max_pool_2d(self.lrn2)
 
 		self.inception_3a = self._inception_module("inception_3a", self.pool2, True, [64, 96, 128, 16, 32, 32], None)
 		self.inception_3b = self._inception_module("inception_3b", self.inception_3a, True, [128, 128, 192, 32, 96, 64], None)
-		self.pool3 = tf.compat.v1.layers.max_pooling2d(inputs=self.inception_3b, pool_size=3, strides=2, padding='SAME')
+		self.pool3 = max_pool_2d(self.inception_3b)
 
 		self.inception_4a = self._inception_module("inception_4a", self.pool3, True, [192, 96, 208, 16, 48, 64], None)
 		self.inception_4b = self._inception_module("inception_4b", self.inception_4a, True, [160, 112, 224, 24, 64, 64], None)
 		self.inception_4c = self._inception_module("inception_4c", self.inception_4b, True, [128, 128, 256, 24, 64, 64], None)
 		self.inception_4d = self._inception_module("inception_4d", self.inception_4c, True, [112, 144, 288, 32, 64, 64], None)
 		self.inception_4e = self._inception_module("inception_4e", self.inception_4d, True, [256, 160, 320, 32, 128, 128], None)
-		self.pool4 = tf.compat.v1.layers.max_pooling2d(inputs=self.inception_4e, pool_size=3, strides=2, padding='SAME')
+		self.pool4 = max_pool_2d(self.inception_4e)
 
 		self.inception_5a = self._inception_module("inception_5a", self.pool4, True, [256, 160, 320, 32, 128, 128], None)
 		self.inception_5b = self._inception_module("inception_5b", self.inception_5a, True, [384, 192, 384, 48, 128, 128], None)
