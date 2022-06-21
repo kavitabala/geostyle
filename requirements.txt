@@ -1,5 +1,5 @@
 tensorflow-gpu==1.2
 scipy==1.0.0
-numpy==1.14.4
+numpy==1.22.0
 logging==0.5.1.2
 statsmodels==0.10.0.dev0+1013.g7328267
